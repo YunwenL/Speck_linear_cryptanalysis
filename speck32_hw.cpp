@@ -20,8 +20,8 @@ void declare(int r){
       cout << "(declare-fun z_" << i << " () (_ BitVec 16)) " ;
   }
   cout << "(declare-fun a_" << r+1 << " () (_ BitVec 16)) " ;
-  cout << "(declare-fun b_" << r+1 << " () (_ BitVec 16)) " ;  
-  cout << "(declare-fun Weight () (_ BitVec 16)) " ; 
+  cout << "(declare-fun b_" << r+1 << " () (_ BitVec 16)) " ;
+  cout << "(declare-fun Weight () (_ BitVec 16)) " ;
   cout << endl;
   //define hamming weight
   cout <<"(define-fun w_H0 ((x (_ BitVec 16))) (_ BitVec 16)"<<endl;
@@ -47,12 +47,8 @@ void cczformula(int r){
     cout << "(assert (= z_"<<i<<" (bvxor (bvlshr (bvxor ((_ rotate_right 7) a_"<<i<<") (bvxor c_"<<i<<" d_"<<i<<")) #x0001) (bvlshr z_"<<i<<" #x0001))))" << endl;
   }
   for(int i=1; i<=r; i++){
-    for(int j=0; j<=15; j++){
        cout << "(assert (= (bvxor ((_ rotate_right 7) a_"<<i<<") d_"<<i<<") (bvand (bvxor ((_ rotate_right 7) a_"<<i<<") d_"<<i<<") z_"<<i<<")))" << endl;
-    }
-    for(int j=0; j<=15; j++){
        cout << "(assert (= (bvxor c_"<<i<<" d_"<<i<<") (bvand (bvxor c_"<<i<<" d_"<<i<<") z_"<<i<<")))" << endl;
-    }
   }
 }
 
