@@ -1,0 +1,133 @@
+RL_cryptanalysis_talk
+
+This is the presentation of our paper
+rotational cryptanalysis in a differential-linear Perspective, practical distinguishers for round-reduced friet xoodoo and alzette.
+I am yunwen, and this is a joint work with Siwei sun and Chao li.
+
+Differential and linear cryptanalysis are the most general methods to analysis block ciphers, and they have many variants,
+including the boomerang and the differential-linear attack. These combined variants could be stronger than pure differential or linear ones,
+and they are especially effective when the trails covering a smaller number of rounds have a high probabilty, and the probability drops exponentially with the increase of rounds.
+In this talk our focus will be on differential-linear.
+
+For a vetorial boolean function, given an input difference delta and an output mask gamma, we can build a differential-linear distinguishers
+by a linear approximation on the output difference, and the probability of the distinguisher is defined by the number of right inputs.
+accordingly, we have the correlation as 2p-1, and bias is half of the correlation. Now the problem is how to estimate the probability given delta and gamma?
+
+Often we split the cipher into two parts, in some cases, three parts with an intermedate layer connecting E0 and E1. In E0, we find a differential with probability p
+and in E1 we have a linear approximation with bias epsilon, then the total bias of the distinguisher is 2times p times epsilon square.d
+This is a rough estimation, and for better evaluation, many new approaches are proposed, for instance,
+
+Attacks on arx cipher chaskey were proposed in Eurocrypt 2015 and crypto 2020 using differential-linear cryptanalysis with the patitioning technique.
+In 2017, a theoretical formula was proved for evaluting the differential-linear bias which requires to enumerate the full intermediate mask space.
+In 2019, the differential=linear connectivity table was proposed to better evaluate the middle layer between E0 and E1.
+In 2015, it was noticed the theoretical and experimental differential-linear bias have a huge gap due to Dependency,
+and this problem is answered in a very recent crypto 2021 paper by meicheng liu et al. from an algebraic viewpoint.
+
+so our motivation is two folds, how to extend the differential-linear framework, and can we improve the accuracy in the bias evaluation
+
+Before further discussion, i will first explain rotational cryptanalysis, we will later show its connection with differential-linear.
+
+Rotational cryptanalysis was proposed in 2010 for arx ciphers based on a rotational property of modular addition,
+then Morawiecki applied rotational cryptanalysis on keccak. Following-up works on rotational cryptanalysis were proposed on further applications of the technique.
+In several papers on rotational-xor cryptanalysis, it is shown that rotational cryptanalysis can be regarded as a generalisation of differential cryptanalysis,
+where a rotational difference replaces the xor difference. The definition of rotational-xor difference is to add a rotation on one operand,
+when the rotational amount is zero, then it degenerates the ordinary xor difference.
+
+Having the rotational difference in mind, what we do next is to generalise the differential-linear cryptanalysis by replacing the xor difference to rotational difference.
+So we proposed rotational differential-linear cryptanalysis, where given a pair of rotationally related inputs x and x',
+we study the linear approximation with mask gamma on their output differences through the cipher, as this formula shows.
+And accordingly, we define the bias of such a distinguisher by the probability minus 1/2.
+
+Now we can see that rotational differential-linear is a generalisation of differential-linear,
+because when the rotational amount is zero, the distinguisher becomes differential-linear.
+we will come back to this observation later.
+
+SO can we borrow the differential-linear bias computation here, we tried a first approach
+
+In fact, we can borrow the previous idea on differential-linear of separating a cipher into two or three parts,
+and find good differentials and linear approximations to concatenate.
+So here is the detailed deduction on computing the bias. Assume that we have a good rotational differential on the first half of the cipher,
+and a good linear appoximation on the second half. It can be shown that a similar formula can be achieved,
+but instead of the bias in the linear part squared, we have two linear biases, where the masks are rotated.
+but using this formula can be inaccurate in some ciphers because we didn't consider the connectivity effect.
+So we proved a link between rotational differential and linear approximations, and extend the previous formula on differential-linear to rotational differential-linear as well.
+
+The proof can be found in this paper on eprint. This theoretical formula gives a unified view on rotational differential-linear and differential-linear.
+In practice, it still requires us to enumerate all intermedate linear masks.
+And unlike differential probability, the correlations are signed,
+so a summation over a subspace of the linear masks doesn't reflect the real correlation over the whole space, considering the cancelations.
+
+So we decide to take yet another approach, and it is based on the previous work by Morawiecki et al.on rotational cryptanalysis with an application to keccak-f.
+Given a 3dimensional state Axyz, where the nonlinear operation is on the x-axis,
+we rotate the state on the z-axis to get a rotational pair, in other words, an input rotational difference zero.
+The keccak-f permutation without constants is invariant under such a rotation,
+and the aim is to find out which position has a high probability that the output pair differs on that bit.
+There are three rules to compute the probability that the output difference being zero given the probability that the input difference on a certain bit being zero,
+through and xor not.
+For instance, here is the probabilities for the input difference being one is p and q, then after the and operation, the output difference is one with a probability p+q-pq.
+then we can predict the probability of each output bits being unequal, round by round.
+
+We first observed that the rotational distinguisher on keccak-f was a special case of rotational differential-linear where the output mask is one bit.
+Then, our second observation is that the probability of the output bits being unequal through a boolean function can be predicted by the following formula,
+where in the summation, the first term shows the difference transition probability,
+and the second term gives the initial probability distribution of the input difference.
+
+Then our third obseration is on the effect that the constants have on the rotational pairs.
+It actually introduces a new rotational difference, which is constant c xor c rotated.
+If the bit of that rotational difference is nonzero, then we should flip the rotational-differential-linear probability of the specific bit on the state.
+This is called the adjusted c-rule.
+
+So given an input rotational difference delta, the initial probability is fully determined,
+and we can evaluate the round function by regarding it as a circuit with boolean operations,
+so we can compute the rotational differential-linear probability round by round, to find out the position of output bits that is the most biased.
+Here we briefly show an example on Xoodoo permutation.
+Xoodoo is a lightweight permutation designed by the keccak team, arranged in a 3 times 4 cube with 32-bits on each cell.
+One round of xoodoo has 5 steps, where except for step 4, all the others are linear.
+Notice that the constant addition is before the nonlinear layer,
+we can control the input rotational difference such that the difference before step 4 is zero,
+That helps us to extend the distinguisher one round for free.
+So with this input rotational difference, the rotational amount is 1bit to the left,
+ we get a 4-round rotational differential-linear distinguisher with correlation 1,
+ the output mask is one nonzero bit on the 16th bit of cell (1,0)
+
+Next, we are going one step further to extend rotational differential-linear cryptanalysis to ARX.
+First, we would like to mention that what works for rotational differential-linear also works for differential-linear,
+just with rotational amount being zero,
+so in this talk, we will speak about differential-linear, and the full discussion can be found in our paper.
+To get the propagation rule for addition modulo 2^n, we found that the dependency in the carry function can not be ignored,
+by simply applying three and-rules and two xor-rules.
+What we did is the following, using the observation 2 from the previous slide,
+we deduced a carry-rule, that takes the dependency into fully consideration.
+So given the probabilities of the input difference bit being zero, we can predict the carry difference being zero using this expression.
+Then it follows the modular addition rule for differential-linear propagation.
+Given the input differences being 7 7 to a 8bit modular addition, the probabilities that the output difference bits are nonzero can be computed as this table shows.
+and our experiment confirms the result.
+This is particularly efficient for modular additions with 64-bit or more, where a direct computation of the differential-linear bias would be computationally infeasible.
+Another interesting thing that we observed is that the differential-linear probability seems to have a rotational behaviour when the input differences rotate,
+for instance, when we rotate the difference 01 to 02, the resulting probability is also shifted.
+And this can be used to explain an experimental result on the rotational property in the differential-linear distinguishers of siphash,
+and give a theoretical evaluation on the found differential-linear distinguisher.
+
+We then apply rotational differential-linear cryptanalysis and the new method of evaluating the probability to several cryptographic permutations,
+here I show the application of Alzette for some more details.
+Alzette is a 64-bit ARX-based permuation presented in crypto 2020, it has two branches, so each with 32-bits.
+The structure has only modular addition, rotation and xor.
+Because our previous propagation rules contain quadratic and higher-degree terms. And also
+The size of this permutation is not too large, so we actually can use the quadratic constraint programming in gurobi to search for a good input difference.
+Our objective is to minimise the overall probability for all one-bit output masks,
+and we observed that input differences with low and high hamming weights tend to give better rotational differential-linear distinguishers in alzette.
+we also carried out experiments to compare the probability with the theoretical evaluation,
+for instance, here we have input difference 80000000,0 in differential-linear setting, and the results are depicted in the following figure.
+the x-axis is the position of output difference from 0 to 63, and the y-axis is the probability. The statistics show basically the same pattern.
+
+An overview of all applications can be found here in this table.
+We found a 13-round rotational differential-linear distinguisher for the permutation friet, 4-round for xoodoo, and 4-round for alzette.
+We tested the experimental probability to verify the distinguishers whenever possible.
+The distinguishers show an advantage over traditional differential or linear distinguishers either in the number of covered rounds or the proababilty.
+
+To conclude, in this paper, we proposed rotational differential-linear cryptanalysis as a generalisation of differential-linear,
+and the theoretical analysis on rotational differential-linear is given.
+Then, a new method for computing the probability of rotational differential linear distinguisher is presented,
+which is efficient by evaluating round by round.
+Finally, our technique is applied to three permutaions, where practical distinguishers are obtained.
+Thank you for your attention!
